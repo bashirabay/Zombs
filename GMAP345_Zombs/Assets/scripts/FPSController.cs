@@ -4,15 +4,6 @@ using UnityEngine;
 using TMPro;
 
 public class FPSController : MonoBehaviour
-
-    /*
-    * Author: Vanessa Cunha
-    * Purpose: Movement Code for the FPS Game and Camera Controls
-    * Class: GMAP 231
-    * Assignment 6: NavMesh
-    * Due Date: August 22nd, 2023
-    */
-
 {
     //movement Variables
     public float walkSpeed = 5f;
@@ -26,11 +17,13 @@ public class FPSController : MonoBehaviour
 
     //Public keycode for unlocking the mouse
     public KeyCode unlockMouse = KeyCode.Delete;
+    public float runSpeed;
 
     //Private Variables
     private CharacterController _characterController;
     Vector3 _moveDirection = Vector3.zero;
     private float rotationX = 0;
+    private float speed;
 
     // Start is called before the first frame update
     void Start()
@@ -41,6 +34,8 @@ public class FPSController : MonoBehaviour
         //locks the cursor to the center of the game window and hides it so it looks more like an fps
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        runSpeed = walkSpeed * 3f;
+        speed = walkSpeed;
     }
 
     // Update is called once per frame
@@ -51,6 +46,15 @@ public class FPSController : MonoBehaviour
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftAlt))
+        {
+            walkSpeed = runSpeed;
+        }
+        else if (Input.GetKeyUp(KeyCode.LeftAlt))
+        {
+            walkSpeed = speed;
         }
 
         //Local Vector Variables used to store 
@@ -104,6 +108,5 @@ public class FPSController : MonoBehaviour
         /*rotate our character to match horizontal mouse input, we use multiply here because of the nature of quaternions. You can't use addition to add one to the other. 
         to combine 2 quaternions like we want here (our original quaternion rotation + the rotation we want to turn to based on mouse input) we multiply the original by the second*/
         this.transform.rotation *= Quaternion.Euler(0, Input.GetAxisRaw("Mouse X") * lookSpeed, 0);
-
     }
 }

@@ -146,5 +146,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0d6effe7d5002f4d8b09249ccb597df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  destroyableObjects: []
-  explosionEffect: {fileID: 0}
+  destroyableObjects:
+  - Zombie
+  explosionEffect: {fileID: 5866978268026902676, guid: 18922da30d26fb94a9df0924c05436e2, type: 3}
+  scoreValue: 10

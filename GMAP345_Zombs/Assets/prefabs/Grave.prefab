@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8658964794618441143}
   - component: {fileID: 2888163231715266392}
   - component: {fileID: 6832891532295926943}
-  - component: {fileID: 7217642448802670312}
   - component: {fileID: 1167446301897145826}
   m_Layer: 0
   m_Name: Grave
@@ -63,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9fe0a856a63e8634ebc7077bc570ea68, type: 2}
+  - {fileID: 2100000, guid: b7ca4b6428cc82c49b61d7c9fe45fb65, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -85,18 +84,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &7217642448802670312
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8234838259006988770}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6335d3c673a5552468837f9cfd2463fe, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!135 &1167446301897145826
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -116,5 +103,5 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.67
+  m_Radius: 0.33
   m_Center: {x: -0.00081361, y: -0.15150914, z: 0.1256457}

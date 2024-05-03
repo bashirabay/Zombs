@@ -4,7 +4,7 @@ using TMPro;
 public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
-    public int score;
+    public int score = 0;
     public TextMeshProUGUI scoreText; // Reference to the TextMeshProUGUI element for displaying the score
     public TextMeshProUGUI interactionText; // Reference to the TextMeshProUGUI element for displaying interaction messages
 
@@ -22,10 +22,9 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public void AddScore(int points)
+    void UpdateScoreText()
     {
-        score += points;
-        UpdateScoreText();
+        scoreText.text = "Score: " + score.ToString();
     }
 
     public void ShowInteractionText(string message)
@@ -39,8 +38,16 @@ public class GameManager : MonoBehaviour
         interactionText.gameObject.SetActive(false);
     }
 
-    void UpdateScoreText()
+    public void AddScore(int points)
     {
-        scoreText.text = "Score: " + score.ToString();
+        score += points;
+        UpdateScoreText();
+    }
+
+    // Function to set the score directly
+    public void SetScore(int newScore)
+    {
+        score = newScore;
+        UpdateScoreText();
     }
 }

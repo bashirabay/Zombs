@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Projectile
   - Grave
+  - Zombie
+  - WIN
   layers:
   - Default
   - TransparentFX
