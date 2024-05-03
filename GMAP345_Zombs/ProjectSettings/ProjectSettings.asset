@@ -726,7 +726,13 @@ PlayerSettings:
   XboxOneOverrideIdentityPublisher: 
   vrEditorSettings: {}
   cloudServicesEnabled:
+    Build: 0
+    Game Performance: 0
+    Legacy Analytics: 0
+    Purchasing: 0
+    UDP: 0
     UNet: 1
+    Unity Ads: 0
   luminIcon:
     m_Name: 
     m_ModelFolderPath: 
@@ -746,11 +752,11 @@ PlayerSettings:
   apiCompatibilityLevel: 6
   activeInputHandler: 2
   windowsGamepadBackendHint: 0
-  cloudProjectId: aeabb10a-5b68-4261-afc8-35bf21d15ad1
+  cloudProjectId: e93f051c-0c13-4a90-b8dc-b79ff120918c
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
   projectName: GMAP345_Zombs
-  organizationId: bee_bay
+  organizationId: vannycoo
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}
