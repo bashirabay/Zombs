@@ -1,112 +1,130 @@
-﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
+using UnityEngine.UI;
 
 public class FPSController : MonoBehaviour
 {
-    //movement Variables
+    // Movement Variables
     public float walkSpeed = 5f;
+    public float runSpeed = 10f; // Separate variable for run speed
     public float jumpHeight = 5f;
     public float gravity = 9.81f;
+    public float interactionDistance = 5f;
 
-    //camera Variables
+    // Camera Variables
     public Camera playerCamera;
     public float lookSpeed = 2f;
     public float lookXLimit = 45f;
 
-    //Public keycode for unlocking the mouse
+    // Public keycode for unlocking the mouse
     public KeyCode unlockMouse = KeyCode.Delete;
-    public float runSpeed;
 
-    //Private Variables
-    private CharacterController _characterController;
-    Vector3 _moveDirection = Vector3.zero;
+    public Image staminaBar;
+    public float stamina;
+    public float maxStamina;
+    public float runCost;
+    public float staminaReplenishRate = 5f;
+    public float sprintCooldown = 1f; // Cooldown time after stamina reaches zero
+
+    private CharacterController characterController;
+    private Vector3 moveDirection = Vector3.zero;
     private float rotationX = 0;
-    private float speed;
+    private bool isSprinting = false;
+    private float sprintCooldownTimer = 0f;
 
     // Start is called before the first frame update
     void Start()
     {
-        //find the character controller on the gameObject, our movement script here will use functionality from the character controller component to move
-        _characterController = GetComponent<CharacterController>();
+        // Find the character controller on the gameObject
+        characterController = GetComponent<CharacterController>();
 
-        //locks the cursor to the center of the game window and hides it so it looks more like an fps
+        // Lock the cursor to the center of the game window and hide it
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        runSpeed = walkSpeed * 3f;
-        speed = walkSpeed;
+
+        stamina = maxStamina;
     }
 
     // Update is called once per frame
     void Update()
     {
-        //let players get their mouse back if they want
+        // Let players get their mouse back if they want
         if (Input.GetKeyDown(unlockMouse))
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftAlt))
+        // Sprint mechanic
+        if (Input.GetKey(KeyCode.LeftShift) && stamina > 0 && sprintCooldownTimer <= 0f)
         {
-            walkSpeed = runSpeed;
+            isSprinting = true;
+            walkSpeed = runSpeed; // Set walk speed to run speed
+            stamina -= runCost * Time.deltaTime;
+            staminaBar.fillAmount = stamina / maxStamina;
         }
-        else if (Input.GetKeyUp(KeyCode.LeftAlt))
-        {
-            walkSpeed = speed;
-        }
-
-        //Local Vector Variables used to store 
-        Vector3 forward = transform.TransformDirection(Vector3.forward);
-        Vector3 right = transform.TransformDirection(Vector3.right);
-
-        //Local float Variables to calculate how fast we should move both forward and side to side based on player input
-        float currentSpeedX = walkSpeed * Input.GetAxis("Vertical");
-        float currentSpeedY = walkSpeed * Input.GetAxis("Horizontal");
-
-        //local float variable to store the current vertical direction of our player
-        float jumpDirection = _moveDirection.y;
-
-        //calculate movement vector based on our speed variables for moving forward and side to side 
-        _moveDirection = (forward * currentSpeedX) + (right * currentSpeedY);
-
-        //adds vertical movement to our player if the player is on the ground and pressed the jump button
-        if (Input.GetButton("Jump") && _characterController.isGrounded)
-        {
-            _moveDirection.y = jumpHeight;
-        }
-
-        //stops adding vertical movement while the player is not jumping
         else
         {
-            _moveDirection.y = jumpDirection;
+            isSprinting = false;
+            walkSpeed = 5f; // Reset walk speed
         }
 
-        //if the player is not on the ground subtracts our gravity force from vertical movement. This will allows for the player jump to slowly reach a peak and then return to the ground over time
-        if (!_characterController.isGrounded)
+        // Replenish stamina gradually
+        if (!isSprinting && stamina < maxStamina)
         {
-            _moveDirection.y -= gravity * Time.deltaTime;
+            stamina += staminaReplenishRate * Time.deltaTime;
+            stamina = Mathf.Clamp(stamina, 0, maxStamina);
+            staminaBar.fillAmount = stamina / maxStamina;
         }
-        //resets vertical movement to 0 after landing
-        else if (_characterController.isGrounded && _moveDirection.y < 0)
-        {
-            _moveDirection.y = 0;
-        }
-        //apply our final move direction to the player in game using the built in characterController move funciton
-        _characterController.Move(_moveDirection * Time.deltaTime);
 
-        //calculate where our camera should rotate based on mouse input
+        // Check if stamina is empty and trigger cooldown
+        if (stamina <= 0)
+        {
+            // Set walk speed immediately when stamina reaches zero
+            walkSpeed = 5f;
+
+            // Start the sprint cooldown timer
+            sprintCooldownTimer = sprintCooldown;
+        }
+
+        // Update sprint cooldown timer
+        if (sprintCooldownTimer > 0f)
+        {
+            sprintCooldownTimer -= Time.deltaTime;
+        }
+
+        // Handle movement
+        Vector3 forward = transform.TransformDirection(Vector3.forward);
+        Vector3 right = transform.TransformDirection(Vector3.right);
+        float currentSpeedX = walkSpeed * Input.GetAxis("Vertical");
+        float currentSpeedY = walkSpeed * Input.GetAxis("Horizontal");
+        float jumpDirection = moveDirection.y;
+        moveDirection = (forward * currentSpeedX) + (right * currentSpeedY);
+
+        // Handle jump
+        if (Input.GetButton("Jump") && characterController.isGrounded)
+        {
+            moveDirection.y = jumpHeight;
+        }
+        else
+        {
+            moveDirection.y = jumpDirection;
+        }
+
+        // Apply gravity
+        if (!characterController.isGrounded)
+        {
+            moveDirection.y -= gravity * Time.deltaTime;
+        }
+
+        // Apply movement
+        characterController.Move(moveDirection * Time.deltaTime);
+
+        // Handle camera rotation
         rotationX += Input.GetAxis("Mouse Y") * lookSpeed;
-        //restrict how high or low the camera can rotate
         rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
-
-        //rotate the camera to match vertical mouse input, when using Quaternion.Euler the rotation is applied around the given axis not to it, this is why x and y appear to be flipped
-        //hand pneumonic device
         playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
 
-        /*rotate our character to match horizontal mouse input, we use multiply here because of the nature of quaternions. You can't use addition to add one to the other. 
-        to combine 2 quaternions like we want here (our original quaternion rotation + the rotation we want to turn to based on mouse input) we multiply the original by the second*/
-        this.transform.rotation *= Quaternion.Euler(0, Input.GetAxisRaw("Mouse X") * lookSpeed, 0);
+        // Rotate the character
+        transform.rotation *= Quaternion.Euler(0, Input.GetAxisRaw("Mouse X") * lookSpeed, 0);
     }
 }

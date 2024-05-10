@@ -3,18 +3,18 @@ using UnityEngine;
 public class LoseTrigger : MonoBehaviour
 {
     public GameObject loseScreen; // Reference to the lose screen UI canvas
+    public Health health; // Reference to the HealthController script
 
-    private void OnCollisionEnter(Collision collision)
+    void Update()
     {
-        if (collision.gameObject.CompareTag("Zombie"))
+        // Check if health is 0 or less
+        if (health.health <= 0)
         {
             // Pause the game
             Time.timeScale = 0f;
 
             // Activate the lose screen UI canvas
             loseScreen.SetActive(true);
-
-           
         }
     }
 }

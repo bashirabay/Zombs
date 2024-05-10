@@ -5,16 +5,19 @@ using UnityEngine.SceneManagement;
 
 public class Health : MonoBehaviour
 {
-    public int health;
+    public float health, MaxHealth;
+    [SerializeField]
+    private HealthBarUI healthBar;
+    void Start()
+    {
+        healthBar.SetMaxHealth(MaxHealth);
+    }
 
     public void TakeDamage(int damage)
     {
         health -= damage;
 
-        if (health <= 0)
-        {
-            // Reload the current scene
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-        }
+        health = Mathf.Clamp(health, 0, MaxHealth);
+        healthBar.SetHealth(health);
     }
 }

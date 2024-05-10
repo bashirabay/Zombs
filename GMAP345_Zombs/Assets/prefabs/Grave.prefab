@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2888163231715266392}
   - component: {fileID: 6832891532295926943}
   - component: {fileID: 1167446301897145826}
+  - component: {fileID: 2428005173980397562}
   m_Layer: 0
   m_Name: Grave
   m_TagString: Grave
@@ -105,3 +106,17 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.33
   m_Center: {x: -0.00081361, y: -0.15150914, z: 0.1256457}
+--- !u!114 &2428005173980397562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8234838259006988770}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97858374114529d40b095eba3ff03c9c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  graveObject: {fileID: 8234838259006988770}
+  blueMaterial: {fileID: 2100000, guid: a23e3fa6f98e39c42895feec1d9888fc, type: 2}

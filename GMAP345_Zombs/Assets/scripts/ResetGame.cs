@@ -1,15 +1,10 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; // Add this line to include SceneManager
+using UnityEngine.SceneManagement;
 
 public class ResetGame : MonoBehaviour
 {
-    void Update()
+    public void ResetGameScene()
     {
-        // Check if the player presses the "R" key
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            // Reload the current scene
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-        }
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
