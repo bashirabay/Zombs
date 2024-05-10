@@ -15,6 +15,10 @@ public class LoseTrigger : MonoBehaviour
 
             // Activate the lose screen UI canvas
             loseScreen.SetActive(true);
+
+            // Unlock the cursor
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
     }
 }

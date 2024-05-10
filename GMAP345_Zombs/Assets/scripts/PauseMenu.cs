@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
 
 public class PauseMenu : MonoBehaviour
 {
@@ -18,12 +15,13 @@ public class PauseMenu : MonoBehaviour
             if (GamePaused)
             {
                 Resume();
-            } else
+            }
+            else
             {
                 Pause();
             }
         }
-        
+
     }
 
     public void Resume()
@@ -31,7 +29,8 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(false);
         Time.timeScale = 1f;
         GamePaused = false;
-
+        Cursor.lockState = CursorLockMode.Locked; // Lock cursor
+        Cursor.visible = false; // Hide cursor
     }
 
     void Pause()
@@ -39,22 +38,26 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(true);
         Time.timeScale = 0f;
         GamePaused = true;
-        
+        Cursor.lockState = CursorLockMode.None; // Unlock cursor
+        Cursor.visible = true; // Show cursor
     }
 
     public void Retry()
     {
         Scene current = SceneManager.GetActiveScene();
         SceneManager.LoadScene(current.name);
+        Resume(); // Unpause the game
     }
-
 
     public void QuitGame()
     {
         SceneManager.LoadScene(0);
         Debug.Log("Quitting game to main menu");
-
     }
 
-
+    // Method to explicitly unpause the game
+    public void UnpauseGame()
+    {
+        Resume();
+    }
 }

@@ -31,6 +31,10 @@ public class FPSController : MonoBehaviour
     private bool isSprinting = false;
     private float sprintCooldownTimer = 0f;
 
+    private bool isCursorLocked = true; // Track if the cursor is locked
+
+    private bool isShootingEnabled = true; // Track if shooting is enabled
+
     // Start is called before the first frame update
     void Start()
     {
@@ -50,10 +54,21 @@ public class FPSController : MonoBehaviour
         // Let players get their mouse back if they want
         if (Input.GetKeyDown(unlockMouse))
         {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
+            ToggleCursorLock(); // Toggle cursor lock state
         }
 
+        if (!PauseMenu.GamePaused)
+        {
+            HandleMovement();
+            if (isCursorLocked)
+            {
+                HandleCameraRotation();
+            }
+        }
+    }
+
+    void HandleMovement()
+    {
         // Sprint mechanic
         if (Input.GetKey(KeyCode.LeftShift) && stamina > 0 && sprintCooldownTimer <= 0f)
         {
@@ -119,6 +134,15 @@ public class FPSController : MonoBehaviour
         // Apply movement
         characterController.Move(moveDirection * Time.deltaTime);
 
+        // Handle shooting
+        if (isShootingEnabled && Input.GetMouseButtonDown(0))
+        {
+            Shoot();
+        }
+    }
+
+    void HandleCameraRotation()
+    {
         // Handle camera rotation
         rotationX += Input.GetAxis("Mouse Y") * lookSpeed;
         rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
@@ -126,5 +150,40 @@ public class FPSController : MonoBehaviour
 
         // Rotate the character
         transform.rotation *= Quaternion.Euler(0, Input.GetAxisRaw("Mouse X") * lookSpeed, 0);
+    }
+
+    public void ToggleCursorLock()
+    {
+        if (!PauseMenu.GamePaused)
+        {
+            // Toggle cursor lock state
+            isCursorLocked = !isCursorLocked;
+
+            // Lock or unlock cursor based on the state
+            Cursor.lockState = isCursorLocked ? CursorLockMode.Locked : CursorLockMode.None;
+            Cursor.visible = !isCursorLocked;
+        }
+    }
+
+    public void EnableShooting()
+    {
+        isShootingEnabled = true;
+    }
+
+    public void DisableShooting()
+    {
+        isShootingEnabled = false;
+    }
+
+    void Shoot()
+    {
+        // Shooting logic here
+    }
+
+    public void ResetGame()
+    {
+        // Reset game state to initial state
+        stamina = maxStamina;
+        isShootingEnabled = true;
     }
 }

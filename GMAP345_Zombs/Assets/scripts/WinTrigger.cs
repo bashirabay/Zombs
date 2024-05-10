@@ -13,6 +13,10 @@ public class WinTrigger : MonoBehaviour
 
             // Activate the win screen UI canvas
             winScreen.SetActive(true);
+
+            // Unlock the cursor
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
     }
 }
