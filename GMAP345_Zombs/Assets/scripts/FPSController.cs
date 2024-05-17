@@ -1,14 +1,15 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 using UnityEngine.UI;
 
 public class FPSController : MonoBehaviour
 {
     // Movement Variables
     public float walkSpeed = 5f;
-    public float runSpeed = 10f; // Separate variable for run speed
     public float jumpHeight = 5f;
     public float gravity = 9.81f;
-    public float interactionDistance = 5f;
 
     // Camera Variables
     public Camera playerCamera;
@@ -18,34 +19,45 @@ public class FPSController : MonoBehaviour
     // Public keycode for unlocking the mouse
     public KeyCode unlockMouse = KeyCode.Delete;
 
-    public Image staminaBar;
-    public float stamina;
-    public float maxStamina;
-    public float runCost;
-    public float staminaReplenishRate = 5f;
-    public float sprintCooldown = 1f; // Cooldown time after stamina reaches zero
+    // Stamina Variables
+    public Image StaminaBar;
+    public float Stamina, MaxStamina;
+    public float RunCost;
+    public float StaminaReplenishRate = 5f;
 
-    private CharacterController characterController;
-    private Vector3 moveDirection = Vector3.zero;
+    // Outline component for glow effect
+    private Outline staminaBarOutline;
+
+    private bool isShiftKeyDown = false;
+
+    // Private Variables
+    private CharacterController _characterController;
+    Vector3 _moveDirection = Vector3.zero;
     private float rotationX = 0;
-    private bool isSprinting = false;
-    private float sprintCooldownTimer = 0f;
-
-    private bool isCursorLocked = true; // Track if the cursor is locked
-
-    private bool isShootingEnabled = true; // Track if shooting is enabled
+    private float speed;
+    private float runSpeed;
 
     // Start is called before the first frame update
     void Start()
     {
         // Find the character controller on the gameObject
-        characterController = GetComponent<CharacterController>();
+        _characterController = GetComponent<CharacterController>();
 
         // Lock the cursor to the center of the game window and hide it
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+        runSpeed = walkSpeed * 3f;
+        speed = walkSpeed;
 
-        stamina = maxStamina;
+        // Get the Outline component from StaminaBar
+        staminaBarOutline = StaminaBar.GetComponent<Outline>();
+        if (staminaBarOutline == null)
+        {
+            staminaBarOutline = StaminaBar.gameObject.AddComponent<Outline>();
+        }
+
+        // Initially disable the glow effect
+        staminaBarOutline.enabled = false;
     }
 
     // Update is called once per frame
@@ -54,136 +66,93 @@ public class FPSController : MonoBehaviour
         // Let players get their mouse back if they want
         if (Input.GetKeyDown(unlockMouse))
         {
-            ToggleCursorLock(); // Toggle cursor lock state
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
 
-        if (!PauseMenu.GamePaused)
+        if (Input.GetKey(KeyCode.LeftShift))
         {
-            HandleMovement();
-            if (isCursorLocked)
-            {
-                HandleCameraRotation();
-            }
-        }
-    }
+            isShiftKeyDown = true;
+            walkSpeed = runSpeed;
+            Stamina -= RunCost * Time.deltaTime;
+            if (Stamina < 0) Stamina = 0;
+            StaminaBar.fillAmount = Stamina / MaxStamina;
 
-    void HandleMovement()
-    {
-        // Sprint mechanic
-        if (Input.GetKey(KeyCode.LeftShift) && stamina > 0 && sprintCooldownTimer <= 0f)
-        {
-            isSprinting = true;
-            walkSpeed = runSpeed; // Set walk speed to run speed
-            stamina -= runCost * Time.deltaTime;
-            staminaBar.fillAmount = stamina / maxStamina;
+            // Enable the glow effect
+            staminaBarOutline.enabled = true;
+            staminaBarOutline.effectColor = Color.yellow; // Set the glow color
+            staminaBarOutline.effectDistance = new Vector2(20, 20); // Increase the glow distance
         }
         else
         {
-            isSprinting = false;
-            walkSpeed = 5f; // Reset walk speed
+            // If the shift key is released, reset the flag
+            isShiftKeyDown = false;
+
+            // Disable the glow effect
+            staminaBarOutline.enabled = false;
         }
 
-        // Replenish stamina gradually
-        if (!isSprinting && stamina < maxStamina)
+        // If the shift key is not being held down, but stamina is not full, gradually replenish it
+        if (!isShiftKeyDown && Stamina < MaxStamina)
         {
-            stamina += staminaReplenishRate * Time.deltaTime;
-            stamina = Mathf.Clamp(stamina, 0, maxStamina);
-            staminaBar.fillAmount = stamina / maxStamina;
+            Stamina += StaminaReplenishRate * Time.deltaTime;
+            Stamina = Mathf.Clamp(Stamina, 0, MaxStamina);
+            StaminaBar.fillAmount = Stamina / MaxStamina;
         }
 
-        // Check if stamina is empty and trigger cooldown
-        if (stamina <= 0)
+        // Update walk speed based on whether shift key is held down
+        if (!isShiftKeyDown)
         {
-            // Set walk speed immediately when stamina reaches zero
-            walkSpeed = 5f;
-
-            // Start the sprint cooldown timer
-            sprintCooldownTimer = sprintCooldown;
+            walkSpeed = speed;
         }
-
-        // Update sprint cooldown timer
-        if (sprintCooldownTimer > 0f)
+        if (Stamina <= 0)
         {
-            sprintCooldownTimer -= Time.deltaTime;
+            walkSpeed = speed;
         }
 
-        // Handle movement
+        // Local Vector Variables used to store movement directions
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
+
+        // Local float Variables to calculate movement speed
         float currentSpeedX = walkSpeed * Input.GetAxis("Vertical");
         float currentSpeedY = walkSpeed * Input.GetAxis("Horizontal");
-        float jumpDirection = moveDirection.y;
-        moveDirection = (forward * currentSpeedX) + (right * currentSpeedY);
 
-        // Handle jump
-        if (Input.GetButton("Jump") && characterController.isGrounded)
+        // Local float variable to store the current vertical direction
+        float jumpDirection = _moveDirection.y;
+
+        // Calculate movement vector
+        _moveDirection = (forward * currentSpeedX) + (right * currentSpeedY);
+
+        // Add vertical movement if jumping
+        if (Input.GetButton("Jump") && _characterController.isGrounded)
         {
-            moveDirection.y = jumpHeight;
+            _moveDirection.y = jumpHeight;
         }
         else
         {
-            moveDirection.y = jumpDirection;
+            _moveDirection.y = jumpDirection;
         }
 
-        // Apply gravity
-        if (!characterController.isGrounded)
+        // Apply gravity if not grounded
+        if (!_characterController.isGrounded)
         {
-            moveDirection.y -= gravity * Time.deltaTime;
+            _moveDirection.y -= gravity * Time.deltaTime;
         }
-
-        // Apply movement
-        characterController.Move(moveDirection * Time.deltaTime);
-
-        // Handle shooting
-        if (isShootingEnabled && Input.GetMouseButtonDown(0))
+        else if (_characterController.isGrounded && _moveDirection.y < 0)
         {
-            Shoot();
+            _moveDirection.y = 0;
         }
-    }
 
-    void HandleCameraRotation()
-    {
-        // Handle camera rotation
+        // Apply movement to the player
+        _characterController.Move(_moveDirection * Time.deltaTime);
+
+        // Calculate camera rotation based on mouse input
         rotationX += Input.GetAxis("Mouse Y") * lookSpeed;
         rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
+
+        // Rotate the camera
         playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
-
-        // Rotate the character
-        transform.rotation *= Quaternion.Euler(0, Input.GetAxisRaw("Mouse X") * lookSpeed, 0);
-    }
-
-    public void ToggleCursorLock()
-    {
-        if (!PauseMenu.GamePaused)
-        {
-            // Toggle cursor lock state
-            isCursorLocked = !isCursorLocked;
-
-            // Lock or unlock cursor based on the state
-            Cursor.lockState = isCursorLocked ? CursorLockMode.Locked : CursorLockMode.None;
-            Cursor.visible = !isCursorLocked;
-        }
-    }
-
-    public void EnableShooting()
-    {
-        isShootingEnabled = true;
-    }
-
-    public void DisableShooting()
-    {
-        isShootingEnabled = false;
-    }
-
-    void Shoot()
-    {
-        // Shooting logic here
-    }
-
-    public void ResetGame()
-    {
-        // Reset game state to initial state
-        stamina = maxStamina;
-        isShootingEnabled = true;
+        this.transform.rotation *= Quaternion.Euler(0, Input.GetAxisRaw("Mouse X") * lookSpeed, 0);
     }
 }
