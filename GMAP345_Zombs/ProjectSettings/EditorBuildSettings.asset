@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: Assets/Scenes/Bashira/Main Menu.unity
     guid: 83304aa4ae7c04649af6c1d581425f38
   - enabled: 1
-    path: Assets/Scenes/Vanessa/MASTER.unity
+    path: Assets/Scenes/Vanessa/MASTER_MainLevel.unity
     guid: d84039046075f5c428b418fc93df8d81
   - enabled: 1
     path: Assets/Scenes/Bashira/Credits.unity
