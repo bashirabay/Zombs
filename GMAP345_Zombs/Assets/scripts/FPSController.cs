@@ -25,6 +25,11 @@ public class FPSController : MonoBehaviour
     public float RunCost;
     public float StaminaReplenishRate = 5f;
 
+    // Health Variables
+    public float health, MaxHealth;
+    [SerializeField]
+    private HealthBarUI healthBar;
+
     // Outline component for glow effect
     private Outline staminaBarOutline;
 
@@ -36,6 +41,7 @@ public class FPSController : MonoBehaviour
     private float rotationX = 0;
     private float speed;
     private float runSpeed;
+    private bool isSprinting = false;
 
     // Start is called before the first frame update
     void Start()
@@ -46,7 +52,7 @@ public class FPSController : MonoBehaviour
         // Lock the cursor to the center of the game window and hide it
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        runSpeed = walkSpeed * 3f;
+        runSpeed = walkSpeed * 2f;
         speed = walkSpeed;
 
         // Get the Outline component from StaminaBar
@@ -58,6 +64,9 @@ public class FPSController : MonoBehaviour
 
         // Initially disable the glow effect
         staminaBarOutline.enabled = false;
+
+        // Initialize health bar
+        healthBar.SetMaxHealth(MaxHealth);
     }
 
     // Update is called once per frame
@@ -70,7 +79,7 @@ public class FPSController : MonoBehaviour
             Cursor.visible = true;
         }
 
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (Input.GetKey(KeyCode.LeftShift) && !isSprinting)
         {
             isShiftKeyDown = true;
             walkSpeed = runSpeed;
@@ -101,7 +110,7 @@ public class FPSController : MonoBehaviour
         }
 
         // Update walk speed based on whether shift key is held down
-        if (!isShiftKeyDown)
+        if (!isShiftKeyDown && !isSprinting)
         {
             walkSpeed = speed;
         }
@@ -154,5 +163,29 @@ public class FPSController : MonoBehaviour
         // Rotate the camera
         playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
         this.transform.rotation *= Quaternion.Euler(0, Input.GetAxisRaw("Mouse X") * lookSpeed, 0);
+    }
+
+    public void Heal(float amount)
+    {
+        health += amount;
+        health = Mathf.Clamp(health, 0, MaxHealth);
+        healthBar.SetHealth(health);
+    }
+
+    public void ActivateSprintPowerUp(float duration)
+    {
+        StartCoroutine(SprintPowerUp(duration));
+    }
+
+    private IEnumerator SprintPowerUp(float duration)
+    {
+        float originalSpeed = speed;
+        speed += 2; // Increase the base speed by 2 units
+        walkSpeed = speed; // Apply the new speed
+        isSprinting = true;
+        yield return new WaitForSeconds(duration);
+        isSprinting = false;
+        speed = originalSpeed; // Revert to the original speed
+        walkSpeed = speed; // Reapply the original speed
     }
 }

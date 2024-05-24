@@ -15,11 +15,11 @@ public class GenerateZombs : MonoBehaviour
     }
     IEnumerator EnemyDrop()
     {
-        while (enemyCount < 20)
+        while (enemyCount < 25)
         {
-            xPos = Random.Range(1, -115);
-            zPos = Random.Range(-35, 80);
-            Instantiate(theEnemy, new Vector3(xPos, 2, zPos), Quaternion.identity);
+            xPos = Random.Range(-195, -76);
+            zPos = Random.Range(38, -78);
+            Instantiate(theEnemy, new Vector3(xPos, 18, zPos), Quaternion.identity);
             yield return new WaitForSeconds(10f);
             enemyCount += 1;
         }
