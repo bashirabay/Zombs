@@ -25,7 +25,6 @@ public class GameManager : MonoBehaviour
     void UpdateScoreText()
     {
         scoreText.text = "Score: " + score.ToString();
-        GetComponent<AudioSource>().Play();
     }
 
     public void ShowInteractionText(string message)
