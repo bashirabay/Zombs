@@ -8,7 +8,6 @@ public class FPSController : MonoBehaviour
 {
     // Movement Variables
     public float walkSpeed = 5f;
-    public float jumpHeight = 5f;
     public float gravity = 9.81f;
 
     // Camera Variables
@@ -127,21 +126,8 @@ public class FPSController : MonoBehaviour
         float currentSpeedX = walkSpeed * Input.GetAxis("Vertical");
         float currentSpeedY = walkSpeed * Input.GetAxis("Horizontal");
 
-        // Local float variable to store the current vertical direction
-        float jumpDirection = _moveDirection.y;
-
         // Calculate movement vector
         _moveDirection = (forward * currentSpeedX) + (right * currentSpeedY);
-
-        // Add vertical movement if jumping
-        if (Input.GetButton("Jump") && _characterController.isGrounded)
-        {
-            _moveDirection.y = jumpHeight;
-        }
-        else
-        {
-            _moveDirection.y = jumpDirection;
-        }
 
         // Apply gravity if not grounded
         if (!_characterController.isGrounded)

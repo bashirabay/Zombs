@@ -13,6 +13,7 @@ public class GraveInteraction : MonoBehaviour
     public GameObject objectToDeactivate; // Game object to deactivate during interaction (e.g., player's gun)
     public GameObject objectToActivate; // Game object to activate during interaction (e.g., digging tool)
     public Transform powerUpSpawnPoint; // Transform for the power-up spawn location
+    public AudioSource[] audioSources; // Array of audio sources for the sounds
 
     private bool isGraveBlue = false; // Flag to track if the grave is blue
     private bool isGraveInteractive = true; // Flag to track if the grave is still interactive
@@ -62,6 +63,13 @@ public class GraveInteraction : MonoBehaviour
 
     private IEnumerator DigGrave(FPSController player)
     {
+        // Play a random sound from the audio sources
+        if (audioSources.Length > 0)
+        {
+            int randomIndex = Random.Range(0, audioSources.Length);
+            audioSources[randomIndex].Play();
+        }
+
         // Temporarily deactivate the specified object (e.g., player's gun)
         if (objectToDeactivate != null)
         {

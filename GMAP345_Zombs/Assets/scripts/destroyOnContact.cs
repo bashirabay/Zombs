@@ -7,6 +7,7 @@ public class destroyOnContact : MonoBehaviour
     public List<string> destroyableObjects = new List<string>();
     public GameObject explosionEffect;
     public int scoreValue = 10; // Score value for destroying a zombie
+    public AudioSource explosionSound; // Audio source for the explosion sound effect
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -18,6 +19,12 @@ public class destroyOnContact : MonoBehaviour
                 Destroy(collision.gameObject);
                 GameObject explosion = Instantiate(explosionEffect, transform.position, transform.rotation);
                 Destroy(explosion, 5);
+
+                // Play the explosion sound effect
+                if (explosionSound != null)
+                {
+                    explosionSound.Play();
+                }
 
                 // Add score when a zombie is destroyed
                 GameManager gameManager = FindObjectOfType<GameManager>();

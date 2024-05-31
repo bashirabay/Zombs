@@ -3,6 +3,7 @@ using UnityEngine;
 public class HealthPowerUp : MonoBehaviour
 {
     public float healthAmount = 20f; // Amount of health to restore
+    public AudioSource powerUpSound; // Audio source for the power-up sound effect
 
     private void OnTriggerEnter(Collider other)
     {
@@ -12,7 +13,15 @@ public class HealthPowerUp : MonoBehaviour
             if (playerHealth != null)
             {
                 playerHealth.AddHealth(healthAmount);
-                Destroy(gameObject); // Destroy the power-up after use
+
+                // Play the power-up sound effect
+                if (powerUpSound != null)
+                {
+                    powerUpSound.Play();
+                }
+
+                // Destroy the power-up after use
+                Destroy(gameObject, powerUpSound.clip.length);
             }
         }
     }
