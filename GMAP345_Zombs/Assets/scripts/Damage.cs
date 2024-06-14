@@ -6,7 +6,6 @@ public class Damage : MonoBehaviour
 {
     public int DMG;
     private Animator anim;
-    private float cooldown = 0f;
     public FlashController flashController;  // Reference to FlashController
 
     private void Start()

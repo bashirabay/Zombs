@@ -27,10 +27,10 @@ public class destroyOnContact : MonoBehaviour
                 }
 
                 // Add score when a zombie is destroyed
-                GameManager gameManager = FindObjectOfType<GameManager>();
-                if (gameManager != null)
+                if (GameManager.instance != null)
                 {
-                    gameManager.AddScore(scoreValue);
+                    GameManager.instance.AddScore(scoreValue);
+                    GameManager.instance.AddZombieKill(); // Increment the zombies killed count
                 }
             }
         }

@@ -1,4 +1,4 @@
-﻿using System.Collections; 
+﻿using System.Collections;
 using UnityEngine;
 
 public class GunfireController : MonoBehaviour
@@ -28,6 +28,8 @@ public class GunfireController : MonoBehaviour
     public PauseMenu pauseMenu;
 
     private bool doubleShotActive = false;
+    private bool canFire = true; // New boolean to manage firing state
+    public float fireDelay = 2f; // Delay between shots in seconds
 
     private void Start()
     {
@@ -40,7 +42,7 @@ public class GunfireController : MonoBehaviour
         if (PauseMenu.GamePaused)
             return;
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && canFire)
         {
             FireWeapon();
         }
@@ -54,6 +56,9 @@ public class GunfireController : MonoBehaviour
 
     public void FireWeapon()
     {
+        canFire = false; // Prevent firing
+        StartCoroutine(FireDelayCoroutine()); // Start the delay coroutine
+
         var flash = Instantiate(muzzlePrefab, muzzlePosition.transform);
 
         if (projectilePrefab != null)
@@ -69,6 +74,12 @@ public class GunfireController : MonoBehaviour
         {
             PlayAudio();
         }
+    }
+
+    private IEnumerator FireDelayCoroutine()
+    {
+        yield return new WaitForSeconds(fireDelay);
+        canFire = true; // Allow firing after delay
     }
 
     private void ShootProjectile(Vector3 offset = default)
@@ -114,4 +125,3 @@ public class GunfireController : MonoBehaviour
         doubleShotActive = false;
     }
 }
-

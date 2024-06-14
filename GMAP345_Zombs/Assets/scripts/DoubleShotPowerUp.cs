@@ -20,7 +20,8 @@ public class DoubleShotPowerUp : MonoBehaviour
                     powerUpSound.Play();
                 }
 
-                // Destroy the power-up after use
+                // Immediately hide the power-up object
+                gameObject.SetActive(false);
                 Destroy(gameObject, powerUpSound.clip.length);
             }
         }

@@ -8,6 +8,7 @@ TagManager:
   - Grave
   - Zombie
   - WIN
+  - PowerUpText
   layers:
   - Default
   - TransparentFX

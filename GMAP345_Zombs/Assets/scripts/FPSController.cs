@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
@@ -8,6 +7,7 @@ public class FPSController : MonoBehaviour
 {
     // Movement Variables
     public float walkSpeed = 5f;
+    public float jumpHeight = 5f;
     public float gravity = 9.81f;
 
     // Camera Variables
@@ -24,15 +24,11 @@ public class FPSController : MonoBehaviour
     public float RunCost;
     public float StaminaReplenishRate = 5f;
 
-    // Health Variables
-    public float health, MaxHealth;
-    [SerializeField]
-    private HealthBarUI healthBar;
-
     // Outline component for glow effect
     private Outline staminaBarOutline;
 
     private bool isShiftKeyDown = false;
+    private bool isSprintPowerUpActive = false;
 
     // Private Variables
     private CharacterController _characterController;
@@ -40,7 +36,6 @@ public class FPSController : MonoBehaviour
     private float rotationX = 0;
     private float speed;
     private float runSpeed;
-    private bool isSprinting = false;
 
     // Start is called before the first frame update
     void Start()
@@ -63,9 +58,6 @@ public class FPSController : MonoBehaviour
 
         // Initially disable the glow effect
         staminaBarOutline.enabled = false;
-
-        // Initialize health bar
-        healthBar.SetMaxHealth(MaxHealth);
     }
 
     // Update is called once per frame
@@ -78,18 +70,22 @@ public class FPSController : MonoBehaviour
             Cursor.visible = true;
         }
 
-        if (Input.GetKey(KeyCode.LeftShift) && !isSprinting)
+        if (Input.GetKey(KeyCode.LeftShift))
         {
             isShiftKeyDown = true;
             walkSpeed = runSpeed;
-            Stamina -= RunCost * Time.deltaTime;
-            if (Stamina < 0) Stamina = 0;
-            StaminaBar.fillAmount = Stamina / MaxStamina;
 
-            // Enable the glow effect
-            staminaBarOutline.enabled = true;
-            staminaBarOutline.effectColor = Color.yellow; // Set the glow color
-            staminaBarOutline.effectDistance = new Vector2(20, 20); // Increase the glow distance
+            if (!isSprintPowerUpActive)
+            {
+                Stamina -= RunCost * Time.deltaTime;
+                if (Stamina < 0) Stamina = 0;
+                StaminaBar.fillAmount = Stamina / MaxStamina;
+
+                // Enable the glow effect
+                staminaBarOutline.enabled = true;
+                staminaBarOutline.effectColor = Color.yellow; // Set the glow color
+                staminaBarOutline.effectDistance = new Vector2(20, 20); // Increase the glow distance
+            }
         }
         else
         {
@@ -109,7 +105,7 @@ public class FPSController : MonoBehaviour
         }
 
         // Update walk speed based on whether shift key is held down
-        if (!isShiftKeyDown && !isSprinting)
+        if (!isShiftKeyDown)
         {
             walkSpeed = speed;
         }
@@ -126,8 +122,21 @@ public class FPSController : MonoBehaviour
         float currentSpeedX = walkSpeed * Input.GetAxis("Vertical");
         float currentSpeedY = walkSpeed * Input.GetAxis("Horizontal");
 
+        // Local float variable to store the current vertical direction
+        float jumpDirection = _moveDirection.y;
+
         // Calculate movement vector
         _moveDirection = (forward * currentSpeedX) + (right * currentSpeedY);
+
+        // Add vertical movement if jumping
+        if (Input.GetButton("Jump") && _characterController.isGrounded)
+        {
+            _moveDirection.y = jumpHeight;
+        }
+        else
+        {
+            _moveDirection.y = jumpDirection;
+        }
 
         // Apply gravity if not grounded
         if (!_characterController.isGrounded)
@@ -143,7 +152,7 @@ public class FPSController : MonoBehaviour
         _characterController.Move(_moveDirection * Time.deltaTime);
 
         // Calculate camera rotation based on mouse input
-        rotationX += Input.GetAxis("Mouse Y") * lookSpeed;
+        rotationX -= Input.GetAxis("Mouse Y") * lookSpeed;  // Inverted here
         rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
 
         // Rotate the camera
@@ -151,27 +160,26 @@ public class FPSController : MonoBehaviour
         this.transform.rotation *= Quaternion.Euler(0, Input.GetAxisRaw("Mouse X") * lookSpeed, 0);
     }
 
-    public void Heal(float amount)
-    {
-        health += amount;
-        health = Mathf.Clamp(health, 0, MaxHealth);
-        healthBar.SetHealth(health);
-    }
-
     public void ActivateSprintPowerUp(float duration)
     {
-        StartCoroutine(SprintPowerUp(duration));
+        if (!isSprintPowerUpActive)
+        {
+            StartCoroutine(SprintPowerUpCoroutine(duration));
+        }
     }
 
-    private IEnumerator SprintPowerUp(float duration)
+    private IEnumerator SprintPowerUpCoroutine(float duration)
     {
-        float originalSpeed = speed;
-        speed += 2; // Increase the base speed by 2 units
-        walkSpeed = speed; // Apply the new speed
-        isSprinting = true;
+        isSprintPowerUpActive = true;
+
+        // Temporarily allow sprinting without stamina cost
+        float originalRunCost = RunCost;
+        RunCost = 0;
+
         yield return new WaitForSeconds(duration);
-        isSprinting = false;
-        speed = originalSpeed; // Revert to the original speed
-        walkSpeed = speed; // Reapply the original speed
+
+        // Revert to normal behavior
+        RunCost = originalRunCost;
+        isSprintPowerUpActive = false;
     }
 }

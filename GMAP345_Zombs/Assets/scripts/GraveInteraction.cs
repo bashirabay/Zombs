@@ -14,9 +14,12 @@ public class GraveInteraction : MonoBehaviour
     public GameObject objectToActivate; // Game object to activate during interaction (e.g., digging tool)
     public Transform powerUpSpawnPoint; // Transform for the power-up spawn location
     public AudioSource[] audioSources; // Array of audio sources for the sounds
+    public string uiTextTag = "PowerUpText"; // Tag for the UI text objects to display power-up activated messages
 
     private bool isGraveBlue = false; // Flag to track if the grave is blue
     private bool isGraveInteractive = true; // Flag to track if the grave is still interactive
+    private bool isDigging = false; // Flag to track if the player is currently digging the grave
+    private bool isCooldownActive = false; // Flag to track if the cooldown is active
     private Material originalMaterial; // To store the original material of the grave
 
     void Start()
@@ -33,11 +36,21 @@ public class GraveInteraction : MonoBehaviour
         {
             dugObject.SetActive(false);
         }
+
+        // Ensure power-up UI texts are inactive at the start
+        GameObject[] uiTextObjects = GameObject.FindGameObjectsWithTag(uiTextTag);
+        if (uiTextObjects != null && uiTextObjects.Length > 0)
+        {
+            foreach (GameObject uiTextObject in uiTextObjects)
+            {
+                uiTextObject.SetActive(false);
+            }
+        }
     }
 
     void OnTriggerStay(Collider other)
     {
-        if (isGraveInteractive && other.CompareTag("Player"))
+        if (isGraveInteractive && other.CompareTag("Player") && !isDigging && !isCooldownActive)
         {
             Vector3 directionToGrave = graveObject.transform.position - other.transform.position;
             float dotProduct = Vector3.Dot(other.transform.forward, directionToGrave.normalized);
@@ -63,6 +76,8 @@ public class GraveInteraction : MonoBehaviour
 
     private IEnumerator DigGrave(FPSController player)
     {
+        isDigging = true; // Set the flag to true to prevent multiple simultaneous dig actions
+
         // Play a random sound from the audio sources
         if (audioSources.Length > 0)
         {
@@ -82,15 +97,7 @@ public class GraveInteraction : MonoBehaviour
             objectToActivate.SetActive(true);
         }
 
-        // Slightly rotate the object to activate for the dig animation
-        Quaternion originalRotation = objectToActivate.transform.rotation;
-        Quaternion digRotation = Quaternion.Euler(originalRotation.eulerAngles + new Vector3(10, 0, 0));
-        objectToActivate.transform.rotation = digRotation;
-
-        yield return new WaitForSeconds(0.5f); // Wait for half a second
-
-        // Reset rotation
-        objectToActivate.transform.rotation = originalRotation;
+        yield return new WaitForSeconds(0.5f); // Simulate time taken to dig
 
         // Increase score by 20 points
         gameManager.AddScore(20);
@@ -128,6 +135,18 @@ public class GraveInteraction : MonoBehaviour
         {
             objectToDeactivate.SetActive(true);
         }
+
+        isDigging = false; // Reset the flag after digging is complete
+
+        // Start the cooldown to prevent multiple power-up spawns
+        StartCoroutine(Cooldown());
+    }
+
+    private IEnumerator Cooldown()
+    {
+        isCooldownActive = true;
+        yield return new WaitForSeconds(2f); // Adjust the cooldown time as needed
+        isCooldownActive = false;
     }
 
     void SpawnPowerUp(FPSController player)
@@ -155,7 +174,33 @@ public class GraveInteraction : MonoBehaviour
         if (powerUpPrefab != null)
         {
             Vector3 spawnPosition = powerUpSpawnPoint != null ? powerUpSpawnPoint.position : graveObject.transform.position;
-            Instantiate(powerUpPrefab, spawnPosition, Quaternion.identity);
+            GameObject powerUp = Instantiate(powerUpPrefab, spawnPosition, Quaternion.identity);
+
+            // Display power-up activated message
+            ShowPowerUpActivatedMessage(powerUp);
         }
+    }
+
+    void ShowPowerUpActivatedMessage(GameObject powerUp)
+    {
+        GameObject[] uiTextObjects = GameObject.FindGameObjectsWithTag(uiTextTag);
+        if (uiTextObjects != null && uiTextObjects.Length > 0)
+        {
+            foreach (GameObject uiTextObject in uiTextObjects)
+            {
+                // Activate the UI text component to display the power-up activated message
+                uiTextObject.GetComponent<TextMesh>().text = powerUp.name + " activated!";
+                uiTextObject.SetActive(true);
+
+                // Deactivate the UI text component after a short delay
+                StartCoroutine(DeactivateUIText(uiTextObject));
+            }
+        }
+    }
+
+    IEnumerator DeactivateUIText(GameObject uiTextObject)
+    {
+        yield return new WaitForSeconds(2f); // Adjust the delay time as needed
+        uiTextObject.SetActive(false);
     }
 }
